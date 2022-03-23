@@ -8,6 +8,7 @@ import scipy as sp
 import scipy.signal as signal
 import cv2
 
+
 # Get lighting object for shading surface plots.
 from matplotlib.colors import LightSource
 
