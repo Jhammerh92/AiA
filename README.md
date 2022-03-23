@@ -4,11 +4,15 @@ To use it put all the content into a folder called "AiA", and place this folder 
 Like this:
     "path/to/site-packages/AiA/contents-of-this-rep"
 
-And the import it in python by:
+And then import it in python by:
 
 import AiA
+
 import AiA.snake
-import AiA.plot as plot
+
+import AiA.plots.plot as plot
+
+
 
 
 Created by Jakob Hammer Hedemann
