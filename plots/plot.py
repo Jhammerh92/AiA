@@ -75,12 +75,13 @@ def plot_im_as_surf(im, ax=None, **kwargs):
 # creates a plot with sliders, one or two, using a callback function eg.:
 """
 def callback(slider1, slider2, **params):
-    x = np.linspace(-10,10)
-    return slider1*x**2  + slider2*x + c
+    x = np.linspace(0,10,1000)
+    return np.sin(slider1*x) + np.cos(slider2*x) +c*x
 """
 # and us the function with the callback, like this:
 """
-plot_slider(callback, [[-2,0,2],[-2,0,2]], c=2)
+c=2
+plot_slider(callback, [[-2,0,2],[-2,0,2]], c=c)
 
 """
 def plot_slider(callback, sliders, plot_type="plot", **callback_params):

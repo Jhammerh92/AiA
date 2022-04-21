@@ -9,6 +9,7 @@ class snake:
     def __init__(self, n_points, im,tau = 200, alpha=0.5, beta=0.5):   
         self.n_points = n_points
         self.points = np.empty((n_points, 2))
+        self.prev_points = np.empty((n_points, 2))
         self.normals = np.empty((n_points, 2))
         self.im_values = np.zeros((n_points,1)) 
         self.im = im
@@ -122,8 +123,10 @@ class snake:
         self.calc_normals()
         self.calc_area_means()
         self.calc_norm_forces()
+        
 
         if update:
+            self.prev_points = self.points
             if smoothing:
                 self.points = self.smoothing_matrix @( self.points +  self.tau * np.diag(self.f_ext.flatten()) @ self.normals ) 
             else:
@@ -132,27 +135,48 @@ class snake:
             self.constrain_to_im()
             
             self.distribute_points()
-            if self.cycle >= 2: # only do every i'th cycle to save perfermance
+            if self.cycle % 1 == 0: # only do every t'th cycle to save perfermance?
                 self.remove_intersections()
-                self.cycle = 0
+                #self.cycle = 0
             self.cycle += 1
 
             
         
-    def converge_to_shape(self,ax=None, conv_lim_perc=1, plot=True,show_normals=False):
-        self.update_snake(False)
-        if ax is None:
-            fig, ax = plt.subplots(1)
+    def converge_to_shape(self,ax=None, conv_lim_pix=0.1, plot=True, show_normals=False):
+        def pop_push(arr, val):
+            arr = np.roll(arr, -1)
+            arr[-1] = val
+            return arr
 
-        while (div := (abs(np.mean(self.im_values) - np.mean([self.m_in,self.m_out] ))/np.mean([self.m_in,self.m_out]) )*100)  > conv_lim_perc:
-            if plot:
-                ax.clear()
-                self.show(ax=ax,show_normals=show_normals)
+        self.update_snake(False) # update all values without updating the snake
+        if ax is None:
+            fig, ax = plt.subplots(2)
+        # need better convergence criteria,  i.e. movement of points?
+        # lower tau if it bounces?
+        last_movement = np.full(7,np.nan)
+
+        while (div := (abs(np.mean(self.im_values) - np.mean([self.m_in,self.m_out] ))/np.mean([self.m_in,self.m_out]) )*100)  > conv_lim_pix:
+            movement = np.mean(np.linalg.norm(self.points - self.prev_points, axis=1)**2)
+            last_movement = pop_push(last_movement, movement)
+            mean_last_movement = np.nanmean(last_movement)
+            if plot and self.cycle % 1 == 0: # only plot every t cycles?
+                ax[0].clear()
+                # ax[1].clear()
+                self.show(ax=ax[0],show_normals=show_normals)
+                print(self.cycle)
+                # ax[1].plot(np.arange(0, self.cycle), movement)
+                # ax[1].axhline( y=mean_last_movement)
                 plt.draw()
                 plt.pause(0.000001)
             self.update_snake()
-            print(div)
-        print(div)
+            # print(div)
+            # print(np.sum(self.f_ext))
+            print(movement, mean_last_movement, abs((movement-mean_last_movement)/mean_last_movement*100), sep = "\t")
+            # print(mean_last_movement)
+            # print(movement < mean_last_movement)
+        # print(div)
+
+
 
     def update_im(self, im):
         

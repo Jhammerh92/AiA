@@ -23,7 +23,7 @@ import maxflow.fastmin
 ### WEEK 1
 
 def imread(im_str, as_type=False, load_type=np.float64, **kwargs):
-    im = skimage.io.imread(im_str,kwargs)
+    im = skimage.io.imread(im_str, kwargs)
     if as_type: im = im.astype(load_type)
     return im
 
